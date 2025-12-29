@@ -15,6 +15,12 @@ constexpr size_t min(const size_t x, const size_t y) noexcept
 {
     return x < y ? x : y;
 }
+
+// -----------------------------------------------------------------------------
+constexpr bool isLearningRateValid(const double learningRate) noexcept
+{
+    return (0.0 < learningRate) && (1.0 >= learningRate);
+}
 } // namespace
 
 // -----------------------------------------------------------------------------
@@ -35,11 +41,15 @@ bool Fixed::train(const Matrix1d& trainIn, const Matrix2d& trainOut, const size_
                    const double learningRate) noexcept
 {
     // Check the epoch count and learning rate, return false if invalid.
-    if ((0U == epochCount) || (0.0 >= learningRate)) { return false; }
+    if ((0U == epochCount) || !isLearningRateValid(learningRate)) { return false; }
 
     // Check the training set count, return false if invalid.
     const size_t setCount{min(trainIn.size(), trainOut.size())};
     if (0U == setCount) { return false; }
+
+    // Clear the trainable parameters before starting training.
+    myWeight = 0.0;
+    myBias   = 0.0;
 
     // Train the model the specified number of epochs.
     for (size_t epoch{}; epoch < epochCount; ++epoch)
