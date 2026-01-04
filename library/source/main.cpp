@@ -74,7 +74,7 @@ void tempTimer() noexcept { myLogic->handleTempTimerTimeout(); }
 bool trainModel(ml::lin_reg::Fixed& model) noexcept
 {
     // Training parameters.
-    constexpr size_t epochCount{20U};
+    constexpr size_t epochCount{100U};
     constexpr double learningRate{0.01};
 
     // Training data to teach the model to predict T = 100 * Uin - 50.
@@ -134,6 +134,7 @@ int main()
     auto& adc{adc::Atmega328p::getInstance()};
 
     //! @todo Create linear regression model that predicts temperature based on input voltage.
+    //!       Train the model and print the result. 
 
     // Initialize the TMP36 temperature sensor.
     tempsensor::Tmp36 tempSensor{tempSensorPin, adc};
@@ -153,10 +154,8 @@ int main()
                        tempSensor};
     myLogic = &logic;
 
-    // Run the application perpetually on the target MCU.
+    // Run the application on the target MCU.
     const bool stop{false};
     myLogic->run(stop);
-
-    // This point should never be reached; the system is intended to run indefinitely on the target MCU.
     return 0;
 }
