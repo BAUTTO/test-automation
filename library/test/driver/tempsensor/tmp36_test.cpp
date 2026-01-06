@@ -58,7 +58,7 @@ constexpr std::int16_t convertToTemp(const std::uint16_t adcVal) noexcept
 }
 
 /**
- * @brief Temp sensor initilaization test.
+ * @brief Temp sensor initialization test.
  * 
  *        Verify that invalid pin numbers are not accepted and the sensor is not initialized 
  *        for out-of-range values.
