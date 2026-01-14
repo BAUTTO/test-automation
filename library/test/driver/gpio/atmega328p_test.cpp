@@ -140,9 +140,10 @@ void runInputTest(const std::uint8_t id, GpioRegs& regs) noexcept
     // Limit the scope of the GPIO instance.
     {
         // Create a new GPIO input with internal pull-up resistor enabled.
-        gpio::Atmega328p gpio{id, gpio::Direction::Input};
+        gpio::Atmega328p gpio{id, gpio::Direction::InputPullup};
 
         // Expect the instance to be initialized correctly if the pin is valid.
+        const bool pinValid{isPinValid(id)};
         EXPECT_EQ(gpio.isInitialized(), isPinValid(id));
 
         if (!isPinValid(id))
@@ -157,13 +158,14 @@ void runInputTest(const std::uint8_t id, GpioRegs& regs) noexcept
         // should be set.
         EXPECT_TRUE(utils::read(regs.portx, pin));
 
-        // Set the input high in PINx, expect the GPIO input to be high.
+        // Set the input high in PINx, (simulate a button press) expect the GPIO input to be high.
         utils::set(regs.pinx, pin);
         EXPECT_TRUE(gpio.read());
 
         // Set the input low in PINx, expect the GPIO input to be low.
         utils::clear(regs.pinx, pin);
         EXPECT_FALSE(gpio.read());
+
     }
     // Expect DDRx and PORTx to be cleared after the instance has been deleted.
     EXPECT_FALSE(utils::read(regs.ddrx, pin));
