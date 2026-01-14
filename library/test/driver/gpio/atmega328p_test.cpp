@@ -92,7 +92,6 @@ void runOutputTest(const std::uint8_t id, GpioRegs& regs) noexcept
     {
         // Create a new GPIO output.
         gpio::Atmega328p gpio{id, gpio::Direction::Output};
-
         // Expect the instance to be initialized correctly if the pin is valid.
         EXPECT_EQ(gpio.isInitialized(), isPinValid(id));
 
