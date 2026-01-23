@@ -31,6 +31,7 @@ public:
         : myReadBuffer{}
         , myBaudRate_bps{baudRate_bps}
         , myEnabled{true}
+        , m_txCount{0U}
     {}
 
     /**
@@ -43,28 +44,40 @@ public:
      * 
      * @return The baud rate in bps (bits per second).
      */
-    uint32_t baudRate_bps() const noexcept override { return myBaudRate_bps; }
+    uint32_t baudRate_bps() const noexcept override
+    {
+        return myBaudRate_bps;
+    }
 
     /**
      * @brief Check whether the serial device is initialized.
      * 
      * @return True if the device is initialized, false otherwise.
      */
-    bool isInitialized() const noexcept override { return true; }
+    bool isInitialized() const noexcept override
+    {
+        return true;
+    }
 
     /**
      * @brief Check whether the serial device is enabled.
      * 
      * @return True if the serial device is enabled, false otherwise.
      */
-    bool isEnabled() const noexcept override { return myEnabled; }
+    bool isEnabled() const noexcept override
+    {
+        return myEnabled;
+    }
 
     /**
      * @brief Set enablement of serial device.
      * 
      * @param[in] enable Indicate whether to enable the device.
      */
-    void setEnabled(const bool enable) noexcept override { myEnabled = enable; }
+    void setEnabled(const bool enable) noexcept override
+    {
+        myEnabled = enable;
+    }
     
     /**
      * @brief Read data from the serial port.
@@ -75,23 +88,31 @@ public:
      * 
      * @return The number of read characters, or -1 on error.
      */
-    int16_t read(uint8_t* buffer, const uint16_t size, 
+    int16_t read(uint8_t* buffer,
+                 const uint16_t size,
                  const uint16_t timeout_ms) const noexcept override
     {
         // Do not use the timeout in the stub implementation.
-        (void) (timeout_ms);
+        (void)timeout_ms;
 
-        // Check the input parameters, return -1 if invalid.
-        if ((nullptr == buffer) || (size == 0U)) { return -1; }
+        if ((nullptr == buffer) || (size == 0U))
+        {
+            return -1;
+        }
 
-        // Determine the number of bytes to read.
-        const uint16_t storedBytes{static_cast<uint16_t>(myReadBuffer.size())};
-        const uint16_t bytesToRead{size < storedBytes ? size : storedBytes};
+        const uint16_t storedBytes{
+            static_cast<uint16_t>(myReadBuffer.size())
+        };
 
-        // Copy contents from the simulated read buffer to given read buffer.
-        for (uint16_t i{}; i < bytesToRead; ++i) { buffer[i] = myReadBuffer[i]; }
+        const uint16_t bytesToRead{
+            size < storedBytes ? size : storedBytes
+        };
 
-        // Return the number of bytes read.
+        for (uint16_t i = 0U; i < bytesToRead; ++i)
+        {
+            buffer[i] = myReadBuffer[i];
+        }
+
         return static_cast<int16_t>(bytesToRead);
     }
 
@@ -102,17 +123,26 @@ public:
      */
     void print(const char* str) const noexcept override
     {
-        // Print in the terminal when testing.
-        if ((!myEnabled) || (NULL == str)) { return; }
+        if ((!myEnabled) || (nullptr == str))
+        {
+            return;
+        }
+
+        // Count transmissions for logic tests
+        ++m_txCount;
+
         #ifdef TESTSUITE
-             std::cout << str;
+            std::cout << str;
         #endif
     }
 
     /**
      * @brief Clear the simulated read buffer.
      */
-    void clearReadBuffer() noexcept { myReadBuffer.clear(); } 
+    void clearReadBuffer() noexcept
+    {
+        myReadBuffer.clear();
+    } 
 
     /**
      * @brief Simulate received data by populating the read buffer.
@@ -120,20 +150,33 @@ public:
      * @param[in] buffer Buffer containing the data to simulate.
      * @param[in] size Size of the buffer in bytes.
      */
-    void setReadBuffer(const uint8_t* buffer, const uint16_t size) noexcept 
+    void setReadBuffer(const uint8_t* buffer,
+                       const uint16_t size) noexcept
     { 
-        // Check the input arguments, terminate the function if invalid.
-        if ((nullptr == buffer) || (0U == size)) { return; }
+        if ((nullptr == buffer) || (size == 0U))
+        {
+            return;
+        }
 
-        // Copy content to the simulated read buffer.
         myReadBuffer.resize(size);
-        for (uint16_t i{}; i < size; ++i) { myReadBuffer[i] = buffer[i]; }
+        for (uint16_t i = 0U; i < size; ++i)
+        {
+            myReadBuffer[i] = buffer[i];
+        }
     }
 
-    Stub(const Stub&)            = delete; // No copy constructor.
-    Stub(Stub&&)                 = delete; // No move constructor.
-    Stub& operator=(const Stub&) = delete; // No copy assignment.
-    Stub& operator=(Stub&&)      = delete; // No move assignment.
+    /**
+     * @brief Get number of transmitted messages (test helper).
+     */
+    std::size_t txCount() const noexcept
+    {
+        return m_txCount;
+    }
+
+    Stub(const Stub&)            = delete;
+    Stub(Stub&&)                 = delete;
+    Stub& operator=(const Stub&) = delete;
+    Stub& operator=(Stub&&)      = delete;
 
 private:
     /** Simulated read buffer. */
@@ -144,6 +187,10 @@ private:
 
     /** Indicate whether serial transmission is enabled. */
     bool myEnabled;
+
+    /** Number of transmitted messages (test helper). */
+    mutable std::size_t m_txCount;
 };
+
 } // namespace serial
 } // namespace driver

@@ -14,8 +14,7 @@
 
 #ifdef TESTSUITE
 
-//! @todo Remove this #ifdef in lecture 3 to enable these tests.
-#ifdef LECTURE3
+
 
 //! @todo Implement tests according to project requirements.
 namespace driver
@@ -76,8 +75,10 @@ void printThread(serial::Interface& serial, const std::string& msg, bool& stop) 
     //! @todo Implement this function!
 
     // Transmit the entire string.
+    serial.printf(msg.c_str());
 
     // Set the stop flag to true to signal that transmission is complete.
+    stop = true;
 }
 
 // -----------------------------------------------------------------------------
@@ -149,6 +150,6 @@ TEST(Serial_Atmega328p, Transmit)
 } // namespace driver.
 
 //! @todo Remove this #endif in lecture 3 to enable these tests.
-#endif /** LECTURE3 */
+
 
 #endif /** TESTSUITE */

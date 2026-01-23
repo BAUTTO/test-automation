@@ -13,3 +13,52 @@
  *           - The ADC must be initialized.
  *           - The linear regression model must be pre-trained.
  */
+#pragma once
+
+#include <cstdint>
+
+#include "driver/tempsensor/interface.h"
+#include "driver/adc/interface.h"
+#include "ml/lin_reg/fixed.h"
+
+namespace driver
+{
+namespace tempsensor
+{
+
+/**
+ * @brief Smart temperature sensor using ADC + linear regression.
+ */
+class Smart final : public Interface
+{
+public:
+    /**
+     * @brief Constructor.
+     *
+     * @param[in] adc      Reference to ADC driver.
+     * @param[in] channel  ADC channel connected to the temperature sensor.
+     * @param[in] model    Pre-trained linear regression model.
+     */
+    Smart(adc::Interface& adc,
+          std::uint8_t channel,
+          const ml::lin_reg::Fixed& model) noexcept;
+
+    /**
+     * @brief Check whether the sensor is initialized.
+     */
+    bool isInitialized() const noexcept override;
+
+    /**
+     * @brief Read temperature in degrees Celsius.
+     */
+    std::int16_t read() const noexcept override;
+
+private:
+    adc::Interface&            m_adc;
+    std::uint8_t               m_channel;
+    const ml::lin_reg::Fixed&  m_model;
+    bool                       m_initialized;
+};
+
+} // namespace tempsensor
+} // namespace driver

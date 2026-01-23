@@ -116,14 +116,17 @@ void runOutputTest(const std::uint8_t id, GpioRegs& regs) noexcept
 
         // Toggle the output, expect the corresponding bit in PORTx to be set.
         gpio.toggle();
+        simulateToggle(regs);
         EXPECT_TRUE(utils::read(regs.portx, pin));
 
         // Toggle the output again, expect the corresponding bit in PORTx to be cleared.
         gpio.toggle();
+        simulateToggle(regs);
         EXPECT_FALSE(utils::read(regs.portx, pin));
 
         // Toggle the output once more, expect the corresponding bit in PORTx to be set.
         gpio.toggle();
+        simulateToggle(regs);
         EXPECT_TRUE(utils::read(regs.portx, pin));
     }
     // Expect DDRx and PORTx to be cleared after the instance has been deleted.
@@ -134,7 +137,7 @@ void runOutputTest(const std::uint8_t id, GpioRegs& regs) noexcept
 // -----------------------------------------------------------------------------
 void runInputTest(const std::uint8_t id, GpioRegs& regs) noexcept
 {
-    // Get the physical pin on the given port.
+    // Get the physical pin on thes given port.
     const std::uint8_t pin{getPhysicalPin(id)};
 
     // Limit the scope of the GPIO instance.
@@ -144,7 +147,7 @@ void runInputTest(const std::uint8_t id, GpioRegs& regs) noexcept
 
         // Expect the instance to be initialized correctly if the pin is valid.
         const bool pinValid{isPinValid(id)};
-        EXPECT_EQ(gpio.isInitialized(), isPinValid(id));
+        EXPECT_EQ(gpio.isInitialized(), pinValid);
         
         // Expect the GPIO to be set as input, i.e., the corresponding bit in DDRx should be cleared.
         EXPECT_FALSE(utils::read(regs.ddrx, pin));
@@ -189,9 +192,7 @@ TEST(Gpio_Atmega328p, Initialization)
         //       Check if the pin is valid by invoking isPinValid(pin).
         //       Use EXPECT_TRUE(), EXPECT_FALSE, and/or EXPECT_EQ to validate the functionality.
         const bool pinValid{isPinValid(pin)};
-        EXPECT_EQ(gpio.isInitialized(), isPinValid(pin));
-
-    
+        EXPECT_EQ(gpio.isInitialized(), pinValid);
 
         // Create another GPIO instance on the same pin.
         // Expect the instance to not be initialized, since the pin is already reserved.
