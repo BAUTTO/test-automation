@@ -15,11 +15,11 @@
  */
 #pragma once
 
-#include <cstdint>
+#include <stdint.h>
 
 #include "driver/tempsensor/interface.h"
 #include "driver/adc/interface.h"
-#include "ml/lin_reg/fixed.h"
+#include "ml/lin_reg/interface.h" // Changed from fixed.h
 
 namespace driver
 {
@@ -35,13 +35,11 @@ public:
     /**
      * @brief Constructor.
      *
+     * @param[in] pin      ADC channel connected to the temperature sensor.
      * @param[in] adc      Reference to ADC driver.
-     * @param[in] channel  ADC channel connected to the temperature sensor.
-     * @param[in] model    Pre-trained linear regression model.
+     * @param[in] linReg   Reference to linear regression model.
      */
-    Smart(adc::Interface& adc,
-          std::uint8_t channel,
-          const ml::lin_reg::Fixed& model) noexcept;
+    Smart(uint8_t pin, adc::Interface& adc, ml::lin_reg::Interface& linReg) noexcept; // Signature change
 
     /**
      * @brief Check whether the sensor is initialized.
@@ -51,13 +49,13 @@ public:
     /**
      * @brief Read temperature in degrees Celsius.
      */
-    std::int16_t read() const noexcept override;
+    int16_t read() const noexcept override;
 
 private:
-    adc::Interface&            m_adc;
-    std::uint8_t               m_channel;
-    const ml::lin_reg::Fixed&  m_model;
-    bool                       m_initialized;
+    adc::Interface&            myAdc;    // Changed name
+    ml::lin_reg::Interface&    myLinReg; // Changed type and name
+    uint8_t                    myPin;    // Changed name
+    // Removed m_initialized
 };
 
 } // namespace tempsensor

@@ -102,6 +102,11 @@ public:
         return myEnabled && (MemSize > address) ? myMemory[address] : 0U;
     }
 
+    void setReadByteValue(const uint16_t address, const uint8_t data) noexcept
+    {
+        if (MemSize > address) { myMemory[address] = data; }
+    }
+
     Stub(const Stub&)            = delete; // No copy constructor.
     Stub(Stub&&)                 = delete; // No move constructor.
     Stub& operator=(const Stub&) = delete; // No copy assignment.

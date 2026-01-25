@@ -1,90 +1,55 @@
-//! @todo Add timer driver stub here!
 #pragma once
 
-#include <stdint.h>   // OK i Microchip Studio / C-miljö
+#include <stdint.h>
 #include "driver/timer/interface.h"
 
 namespace driver
 {
 namespace timer
 {
-
 class Stub final : public Interface
 {
 public:
-    Stub() noexcept
-        : m_initialized{true}
-        , m_enabled{false}
-        , m_timedOut{false}
-        , m_timeoutMs{0}
-    {}
+    Stub() : m_isInitialized(true), m_isEnabled(false), m_hasTimedOut(false), m_timeout_ms(0), m_callback(nullptr), m_count(0) {}
 
-    bool isInitialized() const noexcept override
-    {
-        return m_initialized;
-    }
+    explicit Stub(uint32_t timeout_ms, void (*callback)() = nullptr, bool startTimer = false) noexcept
+        : m_isInitialized(true), m_isEnabled(startTimer), m_hasTimedOut(false), m_timeout_ms(timeout_ms), m_callback(callback), m_count(0) {}
 
-    bool isEnabled() const noexcept override
-    {
-        return m_enabled;
-    }
+    bool isInitialized() const noexcept override { return m_isInitialized; }
+    bool isEnabled() const noexcept override { return m_isEnabled; }
+    bool hasTimedOut() const noexcept override { return m_hasTimedOut; }
+    uint32_t timeout_ms() const noexcept override { return m_timeout_ms; }
+    void setTimeout_ms(uint32_t timeout_ms) noexcept override { m_timeout_ms = timeout_ms; }
+    void start() noexcept override { m_isEnabled = true; m_hasTimedOut = false; m_count = 0; }
+    void stop() noexcept override { m_isEnabled = false; }
+    void toggle() noexcept override { m_isEnabled = !m_isEnabled; }
+    void restart() noexcept override { start(); }
 
-    bool hasTimedOut() const noexcept override
-    {
-        return m_timedOut;
+    // Methods for testing
+    void handleCallback() noexcept {
+        if (m_isEnabled) {
+            m_count++;
+            if (m_count * 10 >= m_timeout_ms) { // Assuming 10ms per callback increment for simulation
+                m_hasTimedOut = true;
+                if (m_callback) {
+                    m_callback();
+                }
+                m_count = 0; // Reset count after timeout
+            }
+        }
     }
+    void setInitialized(bool initialized) { m_isInitialized = initialized; }
+    void setEnabled(bool enabled) { m_isEnabled = enabled; }
+    void setHasTimedOut(bool timedOut) { m_hasTimedOut = timedOut; }
 
-    uint32_t timeout_ms() const noexcept override
-    {
-        return m_timeoutMs;
-    }
-
-    void setTimeout_ms(uint32_t timeout_ms) noexcept override
-    {
-        m_timeoutMs = timeout_ms;
-    }
-
-    void start() noexcept override
-    {
-        m_enabled  = true;
-        m_timedOut = false;
-    }
-
-    void stop() noexcept override
-    {
-        m_enabled = false;
-    }
-
-    void toggle() noexcept override
-    {
-        m_enabled = !m_enabled;
-    }
-
-    void restart() noexcept override
-    {
-        m_enabled  = true;
-        m_timedOut = false;
-    }
-
-    // ------------------------------------------------------------
-    // TEST HELPER (not part of Interface)
-    // Used by logic tests to simulate timer timeout
-    void setTimedOut(bool timedOut) noexcept
-    {
-        m_timedOut = timedOut;
-    }
 
 private:
-    // Highest-level state first
-    bool m_initialized;
-
-    // Runtime state
-    bool m_enabled;
-    bool m_timedOut;
-
-    // Configuration
-    uint32_t m_timeoutMs;
+    bool m_isInitialized;
+    bool m_isEnabled;
+    bool m_hasTimedOut;
+    uint32_t m_timeout_ms;
+    void (*m_callback)();
+    uint32_t m_count;
 };
-
 } // namespace timer
 } // namespace driver
