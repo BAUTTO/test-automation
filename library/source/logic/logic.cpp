@@ -116,6 +116,14 @@ void Logic::handleButtonEvent() noexcept
     myDebounceTimer.start();
 
     // Handle specific button event when pressed.
+    /*
+    if (myToggleButton.read() || myTempButton.read()) // Uncomment this line to test the watchdog timer.
+    {
+        mySerial.printf("ENTERING INFINITE LOOP BUG\n");
+        while (myToggleButton.read() || myTempButton.read()) {} 
+    }
+    */
+
     if (myToggleButton.read()) { handleToggleButtonPressed(); }
     if (myTempButton.read()) { handleTempButtonPressed(); }
 }

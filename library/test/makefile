@@ -44,7 +44,7 @@ GTEST_DIR := /usr/include
 CXX_COMPILER = g++
 
 # C++ compiler flags.
-CXX_FLAGS = -std=c++17 -Werror -Wall -I$(INC_DIR) -I$(GTEST_DIR) -DTESTSUITE
+CXX_FLAGS = -std=c++17 -Werror -Wall -I$(INC_DIR) -I$(GTEST_DIR) -DTESTSUITE -DLECTURE1
 
 # Linked libraries.
 LINK_LIBS = -lgtest -lgmock -lgtest_main -lpthread

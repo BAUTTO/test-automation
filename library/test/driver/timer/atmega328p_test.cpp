@@ -29,6 +29,14 @@ void testCallback() noexcept
 }
 
 // -----------------------------------------------------------------------------
+constexpr uint32_t getMaxCount(const uint32_t timeout_ms) noexcept
+{
+    constexpr double interruptInterval_ms{0.128};
+	return utils::round<uint32_t>(timeout_ms / interruptInterval_ms);
+}
+
+
+// -----------------------------------------------------------------------------
 TEST(Timer_Atmega328p, Initialization)
 {
     timer::Atmega328p timers[MaxTimerCount]{
@@ -75,8 +83,10 @@ TEST(Timer_Atmega328p, Timeout)
     timer.setTimeout_ms(250U);
     EXPECT_EQ(timer.timeout_ms(), 250U);
 
+    // Ensure that timeout cannot be set to 0. It should be unchanged, i.e. 250 ms,
+    // since the request to set the timeout to 0 should be ignored.
     timer.setTimeout_ms(0U);
-    EXPECT_EQ(timer.timeout_ms(), 0U);
+    EXPECT_EQ(timer.timeout_ms(), 250U);
 
     timer.setTimeout_ms(60000U);
     EXPECT_EQ(timer.timeout_ms(), 60000U);
@@ -87,17 +97,19 @@ TEST(Timer_Atmega328p, Callback)
 {
     resetCallbackFlag();
 
-    timer::Atmega328p timer{10U, testCallback};
+    constexpr uint16_t timeout_ms{10U};
+
+    // Compute how many times we need to invoke handleCallback to generate a timeout.
+    constexpr uint32_t maxCount{getMaxCount(timeout_ms)};
+
+    timer::Atmega328p timer{timeout_ms, testCallback};
     timer.start();
 
-    // Drive callback manually – do NOT wait on hasTimedOut()
-    for (std::uint32_t i = 0; i < 1000U; ++i)
+    // Drive callback manually – simulate 10 ms.
+    // THis is generated via interrupts in the real hardware, we have to fake it here.
+    for (std::uint32_t i = 0; i < maxCount; ++i)
     {
         timer.handleCallback();
-        if (callbackInvoked)
-        {
-            break;
-        }
     }
 
     EXPECT_TRUE(callbackInvoked);
@@ -108,27 +120,36 @@ TEST(Timer_Atmega328p, Restart)
 {
     resetCallbackFlag();
 
-    timer::Atmega328p timer{10U, testCallback};
+    constexpr uint16_t timeout_ms{10U};
+
+    // Compute how many times we need to invoke handleCallback to generate a timeout.
+    constexpr uint32_t maxCount{getMaxCount(timeout_ms)};
+
+    timer::Atmega328p timer{timeout_ms, testCallback};
     timer.start();
 
-    for (std::uint32_t i = 0; i < 5U; ++i)
+    // Simulate that the next timer interrupt will generate a timeout (9.99 out to 10 ms).
+    for (std::uint32_t i = 0; i < maxCount - 1U; ++i)
     {
         timer.handleCallback();
     }
 
+    // Restart the timer - we should need to start from scratch.
     timer.restart();
 
     EXPECT_TRUE(timer.isEnabled());
 
-    for (std::uint32_t i = 0; i < 1000U; ++i)
+    // Simulate that the next timer interrupt will generate a timeout (9.99 out to 10 ms).
+    for (std::uint32_t i = 0; i < maxCount - 1U; ++i)
     {
         timer.handleCallback();
-        if (callbackInvoked)
-        {
-            break;
-        }
     }
 
+    // Verify that we don't get a timeout until after 10 ms, not 9.99 ms.
+    EXPECT_FALSE(callbackInvoked);
+
+    // Generate one more interrupt, now 10 ms have passed and we should have a timeout.
+    timer.handleCallback();
     EXPECT_TRUE(callbackInvoked);
 }
 

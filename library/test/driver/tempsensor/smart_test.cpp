@@ -14,9 +14,6 @@
 
 #ifdef TESTSUITE
 
-//! @todo Remove this #ifdef in lecture 1 to enable these tests.
-#ifdef LECTURE1
-
 namespace driver
 {
 namespace
@@ -90,14 +87,13 @@ TEST(TempSensor_Smart, Initialization)
         // Create a temp sensor instance for this pin.
         constexpr std::uint8_t pin{0U};
        
-        //! @todo Set ADC channel validity to true (simulate a valid pin).
-        //! @todo Simulate that the ADC is initialized.
-        //! @todo Create a smart temp sensor here.
+        adc.setChannelValidity(true);
+        adc.setInitialized(true);
+        tempsensor::Smart tempSensor{pin, adc, linReg};
         
         // For valid pins, the sensor should be initialized and return the expected temperature.
-
-        //! @todo Expect the temp sensor to be initialized with EXPECT_TRUE.
-        //! @todo Expect the temp sensor to read the expected temperature with EXPECT_EQ. 
+        EXPECT_TRUE(tempSensor.isInitialized());
+        EXPECT_EQ(tempSensor.read(), expectedTemp);
     }
 
     // Case 2 - Simulate an invalid pin.
@@ -105,14 +101,13 @@ TEST(TempSensor_Smart, Initialization)
         // Create a temp sensor instance for this pin.
         constexpr std::uint8_t pin{10U};
 
-        //! @todo Set ADC channel validity to false (simulate an invalid pin).
-        //! @todo Simulate that the ADC is initialized.
-        //! @todo Create a smart temp sensor here.
+        adc.setChannelValidity(false);
+        adc.setInitialized(true);
+        tempsensor::Smart tempSensor{pin, adc, linReg};
 
         // Expect the temp sensor to not be initialized and to return the default temperature.
-
-        //! @todo Expect the temp sensor to not be initialized with EXPECT_FALSE.
-        //! @todo Expect the temp sensor to read the default temperature with EXPECT_EQ. 
+        EXPECT_FALSE(tempSensor.isInitialized());
+        EXPECT_EQ(tempSensor.read(), defaultTemp);
     }
 
     // Case 3 - Simulate that the ADC isn't initialized.
@@ -120,14 +115,13 @@ TEST(TempSensor_Smart, Initialization)
         // Create a temp sensor instance.
         constexpr std::uint8_t pin{0U};
 
-        //! @todo Set ADC channel validity to true (simulate a valid pin).
-        //! @todo Simulate that the ADC isn't initialized.
-        //! @todo Create a smart temp sensor here.
+        adc.setChannelValidity(true);
+        adc.setInitialized(false);
+        tempsensor::Smart tempSensor{pin, adc, linReg};
 
         // Expect the temp sensor to not be initialized and to return the default temperature.
-
-        //! @todo Expect the temp sensor to not be initialized with EXPECT_FALSE.
-        //! @todo Expect the temp sensor to read the default temperature with EXPECT_EQ. 
+        EXPECT_FALSE(tempSensor.isInitialized());
+        EXPECT_EQ(tempSensor.read(), defaultTemp);
     }
 
     // Case 4 - Simulate that the linear regression model isn't trained.
@@ -139,14 +133,13 @@ TEST(TempSensor_Smart, Initialization)
         ml::lin_reg::Fixed untrainedModel{};
         EXPECT_FALSE(untrainedModel.isTrained());
 
-        //! @todo Set ADC channel validity to true (simulate a valid pin).
-        //! @todo Simulate that the ADC is initialized.
-        //! @todo Create a smart temp sensor here, use the untrained model.
+        adc.setChannelValidity(true);
+        adc.setInitialized(true);
+        tempsensor::Smart tempSensor{pin, adc, untrainedModel};
 
         // Expect the temp sensor to not be initialized and to return the default temperature.
-
-        //! @todo Expect the temp sensor to not be initialized with EXPECT_FALSE.
-        //! @todo Expect the temp sensor to read the default temperature with EXPECT_EQ. 
+        EXPECT_FALSE(tempSensor.isInitialized());
+        EXPECT_EQ(tempSensor.read(), defaultTemp);
     }
 }
 
@@ -182,19 +175,16 @@ TEST(TempSensor_Smart, HappyPath)
     for (std::uint16_t adcVal{}; adcVal <= adcMax; adcVal += stepVal)
     {
         //! Calculate the expected temperature for this ADC value.
-        //! @todo Convert the ADC value to the corresponding temperature via convertToTemp().
+        const auto expectedTemp = convertToTemp(adcVal);
 
         // Set the ADC register to simulate the sensor reading.
         adc.setValue(adcVal);
 
         // The sensor should return the expected temperature for this ADC value.
-        //! @todo Expect the temp sensor to read the expected temperature with EXPECT_EQ. 
+        EXPECT_EQ(tempSensor->read(), expectedTemp);
     }
 }
 } // namespace
 } // namespace driver.
-
-//! @todo Remove this #endif in lecture 1 to enable these tests.
-#endif /** LECTURE1 */
 
 #endif /** TESTSUITE */

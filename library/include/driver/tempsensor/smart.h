@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include <cstdint>
+#include <stdint.h>
 
 #include "driver/tempsensor/interface.h"
 #include "driver/adc/interface.h"
@@ -39,8 +39,8 @@ public:
      * @param[in] channel  ADC channel connected to the temperature sensor.
      * @param[in] model    Pre-trained linear regression model.
      */
-    Smart(adc::Interface& adc,
-          std::uint8_t channel,
+    Smart(uint8_t channel,
+          adc::Interface& adc,
           const ml::lin_reg::Fixed& model) noexcept;
 
     /**
@@ -51,11 +51,11 @@ public:
     /**
      * @brief Read temperature in degrees Celsius.
      */
-    std::int16_t read() const noexcept override;
+    int16_t read() const noexcept override;
 
 private:
+    uint8_t                    m_channel;
     adc::Interface&            m_adc;
-    std::uint8_t               m_channel;
     const ml::lin_reg::Fixed&  m_model;
     bool                       m_initialized;
 };
