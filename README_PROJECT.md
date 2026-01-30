@@ -1,13 +1,13 @@
 # Test Automation & Watchdog Demo
 
-This project demonstrates software/hardware integration testing on an Arduino Uno (ATmega328P). It showcases how to implement and test a **Watchdog Timer (WDT)** to recover from system freezes, alongside other hardware drivers like GPIO, Timers, ADC, and EEPROM.
+This project demonstrates software/hardware integration testing on an Arduino Uno (ATmega328P). It shows how to implement and test a **Watchdog Timer (WDT)** to recover from system freezes, as well as other hardware drivers like GPIO, Timers, ADC, and EEPROM.
 
 ## Key Features
 
-*   **Watchdog Timer Protection:** A safety mechanism that automatically resets the system if the main loop stops running (e.g., due to a software bug or infinite loop).
-*   **LED Toggle (Blink):** Uses a timer to blink an LED. The state (blinking vs. off) is saved to EEPROM, so it remembers its setting even after a power loss or reset.
+*   **Watchdog Timer Protection:** A safety mechanism that automatically resets the system if the main loop stops running.
+*   **LED Toggle (Blink):** Uses a timer to blink an LED. The state is saved to EEPROM, so it remembers its setting.
 *   **Temperature Monitoring:** Reads a temperature sensor (TMP36) and prints the value to the serial console.
-*   **Machine Learning (Linear Regression):** Includes a simple fixed-point linear regression model that "trains" at startup to map sensor voltage to temperature.
+*   **Machine Learning (Linear Regression):** Includes a simple linear regression model that "trains" at startup to map sensor voltage to temperature.
 
 ## How to Test the Watchdog
 
